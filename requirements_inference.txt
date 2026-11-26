@@ -1,0 +1,26 @@
+# Dependencias para script de inferencia (logs.txt)
+# Instalar con: pip install -r requirements_inference.txt
+
+# Deep Learning
+torch
+torchvision
+
+# Procesamiento de imágenes
+Pillow>=10.0.0  # Incluye PIL.ExifTags
+opencv-python
+
+# Supabase
+supabase
+
+# Utilidades
+numpy
+requests
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,14 @@
+# Netlify redirects
+# Specific rules for report viewer
+/report-viewer/*  /index.html  200
+/reports-portal   /index.html  200
+/projects         /index.html  200
+/capture          /index.html  200
+/progress         /index.html  200
+/login            /index.html  200
+/invite           /index.html  200
+/password-reset   /index.html  200
+
+# Catch-all rule for SPA
+/*    /index.html   200
+

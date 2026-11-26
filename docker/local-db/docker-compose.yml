@@ -1,0 +1,27 @@
+# Base de datos LOCAL y aislada (Postgres 17) para probar migraciones y permisos sin tocar Supabase.
+# Puerto 54340 (no choca con `supabase start`, que usa 54322). Usuario/contraseña solo locales.
+#   docker compose -f docker/local-db/docker-compose.yml up -d
+#   bash docker/local-db/apply.sh        # stub de Supabase + migraciones + seeds
+#   docker compose -f docker/local-db/docker-compose.yml down -v   # borra todo
+name: avances-local-db
+services:
+  db:
+    image: postgres:17
+    container_name: avances-local-db
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "127.0.0.1:54340:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../../supabase/migrations:/work/migrations:ro
+      - ../../supabase/seeds:/work/seeds:ro
+      - ./bootstrap:/work/bootstrap:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+volumes:
+  pgdata:

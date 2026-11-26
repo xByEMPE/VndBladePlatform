@@ -1,0 +1,32 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  # --- Cabeceras de seguridad ---
+  Header always unset X-Powered-By
+  Header unset X-Powered-By
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+
+  # CSP en modo SOLO INFORME: el navegador anota en la consola lo que bloquearía, pero no bloquea nada.
+  # Cuando la consola quede limpia con el uso real (visor 3D, editor de daños, PDF), cambiar el nombre de la
+  # cabecera a "Content-Security-Policy" para pasar a modo estricto.
+  Header always set Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co; font-src 'self' data:; connect-src 'self' blob: https://*.supabase.co wss://*.supabase.co https://*.hf.space; worker-src 'self' blob:; child-src 'self' blob:; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+
+  # --- Caché ---
+  # index.html y las rutas de la SPA NO se cachean en el CDN: si no, tras cada despliegue
+  # se sigue sirviendo el index.html viejo (apunta al bundle anterior) hasta por 7 días.
+  Header set Cache-Control "no-cache, must-revalidate"
+
+  # Los assets llevan hash en el nombre (cambian en cada build), así que sí se cachean
+  <If "%{REQUEST_URI} =~ m#^/assets/.*$#">
+    Header set Cache-Control "public, max-age=604800, immutable"
+  </If>
+</IfModule>

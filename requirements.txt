@@ -1,0 +1,28 @@
+# ============================================
+# VND Platform v2 - Unified Requirements
+# Includes Desktop App, Processes, and Inference
+# ============================================
+
+# Core Computer Vision & Image Processing
+opencv-python==4.8.1.78
+opencv-contrib-python==4.8.1.78
+Pillow==10.3.0
+scikit-image==0.22.0
+
+# Numerical & Data
+numpy==1.24.3
+
+# Deep Learning (Inference)
+torch
+torchvision
+
+# Backend & Networking
+supabase
+requests==2.31.0
+urllib3==2.1.0
+
+# Build Tools (for creating executables)
+pyinstaller==6.3.0
+
+# Utilities
+pathlib2==2.3.7; python_version < '3.4'

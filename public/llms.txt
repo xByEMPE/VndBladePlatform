@@ -1,0 +1,5 @@
+## Pages
+- [Avance General - VIND GROUP](/generalprogress): Consulta el estado y avance de todos tus proyectos.
+- [Gestión de Proyectos - VIND GROUP](/projects): Crea y gestiona tus proyectos de inspección.
+- [Portal de Reportes - VIND GROUP](/reportgenerator): Consulta los reportes de inspección de cada proyecto.
+- [Portal de Reportes - VIND GROUP](/reportsportal): Consulta los reportes de inspección de cada proyecto.

@@ -1,0 +1,262 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   TOKENS — única fuente de valores de color (canales HSL "H S% L%").
+   Hex de referencia en el comentario. No usar colores crudos fuera de aquí.
+   ========================================================================== */
+:root {
+  /* Superficies */
+  --surface-base:  216 41.7% 4.7%;   /* #070B11 */
+  --surface-panel: 218 42.2% 8.8%;   /* #0D1420 */
+  --surface-card:  217 41.9% 12.2%;  /* #121C2C */
+
+  /* Bordes */
+  --line-subtle: 216 39.8% 16.3%;    /* #19263A */
+  --line-medium: 217 37.9% 22.7%;    /* #243550 */
+
+  /* Marca y texto */
+  --brand:     39.7 69.6% 57.5%;     /* #DEAB47 oro mostaza */
+  --ink:       210 40% 98%;          /* #F8FAFC */
+  --ink-muted: 216 27.3% 65.5%;      /* #8FA2BF */
+
+  /* Estados */
+  --status-done:     158 64.4% 51.6%; /* #34D399 salvia */
+  --info:            198.4 93.2% 59.6%; /* #38BDF8 azul celeste técnico: rol, sobretítulos, iconos de cabecera */
+  --status-progress: var(--info);        /* "En progreso" usa el azul celeste */
+  --status-alert:    32 51.8% 56.1%;  /* #C99355 */
+  --role-dev:        255.1 91.7% 76.3%; /* #A78BFA violeta: rol Desarrollador (distinto de oro, celeste y verde) */
+
+  /* Error / Cancelado (sobrio) */
+  --error-bg:     345 25% 9.4%;       /* #1E1215 */
+  --error-border: 351 44.8% 20.6%;    /* #4C1D24 */
+  --error-text:   355.3 65.2% 65.1%;  /* #E06C75 */
+
+  /* Severidad de daños (Cat 1 leve → Cat 5 crítica): escala cromática distinguible */
+  --sev-1: var(--status-done);        /* #34D399 verde salvia */
+  --sev-2: 90 62% 54%;                /* #8AD241 verde-lima (entre Cat 1 y Cat 3) */
+  --sev-3: var(--brand);              /* #DEAB47 oro mostaza */
+  --sev-4: 27 96% 61%;                /* #FB923C naranja */
+  --sev-5: 0 84.2% 60.2%;             /* #EF4444 rojo */
+
+  /* Scrollbar (hex: se consume fuera de Tailwind) */
+  --scroll-size:        8px;
+  --scroll-thumb:       #CBD5E1;
+  --scroll-thumb-hover: #FFFFFF;
+  --scroll-track:       #0D1420;
+
+  /* Aliases shadcn → paleta VINDGROUP */
+  --background: var(--surface-base);
+  --foreground: var(--ink);
+  --card: var(--surface-card);
+  --card-foreground: var(--ink);
+  --popover: var(--surface-panel);
+  --popover-foreground: var(--ink);
+  --primary: var(--brand);
+  --primary-foreground: var(--surface-base);
+  --secondary: var(--surface-card);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface-card);
+  --muted-foreground: var(--ink-muted);
+  --accent: var(--line-subtle);
+  --accent-foreground: var(--ink);
+  --destructive: var(--error-border);
+  --destructive-foreground: var(--error-text);
+  --border: var(--line-subtle);
+  --input: var(--line-medium);
+  --ring: var(--brand);
+  --radius: 0.5rem;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  min-height: 100vh;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Custom grid background */
+.bg-grid-yellow-500\/\[0\.05\] {
+    background-image: linear-gradient(hsl(var(--accent)) 1px, transparent 1px), linear-gradient(to right, hsl(var(--accent)) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+.bg-grid-pattern {
+    background-image: linear-gradient(hsl(var(--accent)) 1px, transparent 1px), linear-gradient(to right, hsl(var(--accent)) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+/* Scrollbar claro — Firefox */
+html,
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+}
+
+/* Scrollbar claro — WebKit / Blink */
+::-webkit-scrollbar {
+  width: var(--scroll-size);
+  height: var(--scroll-size);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scroll-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scroll-thumb-hover);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--scroll-track);
+}
+
+/* Bento card: hover elástico + borde reactivo (BentoCard.jsx) */
+@layer components {
+  .bento-card {
+    @apply rounded-xl border border-line-subtle bg-surface-panel
+           transition-[transform,border-color,background-color] duration-bento ease-elastic;
+  }
+  .bento-card:hover {
+    transform: translateY(-2px);
+    @apply border-line-medium;
+  }
+  /* Panel plano: sin elevación ni cambio de borde al hover */
+  .bento-card[data-flat='true']:hover {
+    transform: none;
+    @apply border-line-subtle;
+  }
+  /* Activa: borde de marca (1px + anillo interior 1px = 2px visuales, sin desplazar contenido) */
+  .bento-card[data-active='true'],
+  .bento-card[data-active='true']:hover {
+    @apply border-brand;
+    box-shadow: inset 0 0 0 1px hsl(var(--brand));
+  }
+  .bento-card:focus-visible {
+    @apply outline-none ring-2 ring-brand/60;
+  }
+}
+
+/* Pantallas de autenticación (Invite y Password Reset): fondo, tarjeta y entrada, con tokens.
+   Sustituyen los bloques <style> duplicados de cada página. */
+@layer components {
+  .auth-bg {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--surface-base)) 0%,
+      hsl(var(--surface-card)) 50%,
+      hsl(var(--surface-panel)) 100%
+    );
+    position: relative;
+    overflow: hidden;
+  }
+  .auth-card {
+    backdrop-filter: blur(20px);
+    background: hsl(var(--surface-panel) / 0.9);
+    border: 1px solid hsl(var(--brand) / 0.15);
+    box-shadow:
+      0 25px 50px -12px rgb(0 0 0 / 0.5),
+      0 0 0 1px hsl(var(--brand) / 0.05),
+      inset 0 1px 0 rgb(255 255 255 / 0.03);
+    position: relative;
+    overflow: hidden;
+    z-index: 10;
+  }
+  .auth-card-enter {
+    animation: authCardSlideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+@keyframes authCardSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bento-card,
+  .bento-card:hover {
+    transition: none;
+    transform: none;
+  }
+  .animate-gauge-fill,
+  .auth-card-enter {
+    animation: none;
+  }
+}
+
+/* Print styles for PDF generation */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-page-break {
+    page-break-before: always;
+  }
+}
+
+/* Animation utilities */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Report preview specific styles */
+.report-page {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease;
+}
+
+.report-page:hover {
+  transform: scale(1.02);
+}

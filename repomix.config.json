@@ -1,0 +1,17 @@
+{
+  "output": {
+    "format": "xml",
+    "compress": true,
+    "instructionFilePath": "CLAUDE.md"
+  },
+  "ignore": {
+    "customPatterns": [
+      "node_modules/**",
+      "dist/**",
+      "venv/**",
+      ".venv/**",
+      "__pycache__/**",
+      "*.log"
+    ]
+  }
+}

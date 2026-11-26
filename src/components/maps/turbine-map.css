@@ -1,0 +1,185 @@
+/* Rotor del aerogenerador: las aspas giran siempre (la torre no se mueve). El centro de giro (el buje) y el
+   desfase de cada turbina los fija WindTurbineIcon en línea; aquí solo la animación. Al pasar el cursor, al
+   enfocar o al seleccionar, giran más rápido. Con "reducir movimiento" quedan quietas. */
+.turbine-marker .wind-turbine-rotor {
+  animation: wind-turbine-spin var(--wt-spin, 7s) linear infinite;
+}
+
+.turbine-marker:hover,
+.turbine-marker:focus-visible,
+.turbine-marker[aria-pressed='true'] {
+  --wt-spin: 2.5s;
+}
+
+@keyframes wind-turbine-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Parques grandes (más de MAX_SPINNING_MARKERS visibles): las aspas en reposo quedan quietas para no repintar
+   decenas de figuras en cada cuadro; solo gira la del cursor, el foco o la seleccionada. */
+.turbine-map-static .turbine-marker:not(:hover):not(:focus-visible):not([aria-pressed='true']) .wind-turbine-rotor {
+  animation: none;
+}
+
+/* Insignias de Cat 4 (pulso) y Cat 5 (parpadeo): solo opacity y transform, que se componen sin repintar. */
+.turbine-badge-pulse {
+  animation: turbine-badge-pulse 1.8s ease-in-out infinite;
+}
+
+.turbine-badge-blink {
+  animation: turbine-badge-blink 1.1s ease-in-out infinite;
+}
+
+@keyframes turbine-badge-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.7;
+  }
+}
+
+@keyframes turbine-badge-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* Círculo del marcador: se dibuja a 26 px y se escala. En reposo a --disc-rest (= tamaño elegido / 26, según el
+   espacio libre en pantalla); con mouse, foco o activo a 2x (52 px). Solo transform: no cambia el layout. */
+.turbine-disc {
+  transform: scale(var(--disc-rest, 1));
+  transition: transform 0.2s ease;
+}
+
+.turbine-marker:hover .turbine-disc,
+.turbine-marker:focus-visible .turbine-disc,
+.turbine-disc[data-active='true'] {
+  transform: scale(2);
+}
+
+/* Modo punto (parque denso): un círculo sólido del color de la categoría; el aerogenerador solo aparece al crecer. */
+.turbine-dot {
+  transition: opacity 0.2s ease;
+}
+
+.turbine-disc[data-mode='dot'] .wind-turbine-icon-wrap {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.turbine-marker:hover .turbine-disc[data-mode='dot'] .wind-turbine-icon-wrap,
+.turbine-marker:focus-visible .turbine-disc[data-mode='dot'] .wind-turbine-icon-wrap,
+.turbine-disc[data-mode='dot'][data-active='true'] .wind-turbine-icon-wrap {
+  opacity: 1;
+}
+
+.turbine-marker:hover .turbine-dot,
+.turbine-marker:focus-visible .turbine-dot,
+.turbine-disc[data-active='true'] .turbine-dot {
+  opacity: 0;
+}
+
+/* En modo punto el rotor está oculto: no se anima hasta que crece (ahorra cuadros en parques densos). */
+.turbine-disc[data-mode='dot'] .wind-turbine-rotor {
+  animation: none;
+}
+
+.turbine-marker:hover .turbine-disc[data-mode='dot'] .wind-turbine-rotor,
+.turbine-marker:focus-visible .turbine-disc[data-mode='dot'] .wind-turbine-rotor,
+.turbine-disc[data-mode='dot'][data-active='true'] .wind-turbine-rotor {
+  animation: wind-turbine-spin var(--wt-spin, 7s) linear infinite;
+}
+
+/* Nombre de la turbina: texto plano; la sombra oscura lo separa del mapa sin necesitar caja. Si choca con otro
+   (lo decide lib/markerLayout) se oculta y reaparece con hover o foco, desplazado para no quedar bajo el círculo
+   ampliado. */
+.turbine-marker-label {
+  text-shadow: 0 1px 2px hsl(var(--surface-base)), 0 0 4px hsl(var(--surface-base) / 0.9);
+  transition: opacity 0.2s ease, translate 0.2s ease;
+}
+
+.turbine-label-hidden {
+  opacity: 0;
+}
+
+.turbine-marker:hover .turbine-label-hidden,
+.turbine-marker:focus-visible .turbine-label-hidden {
+  opacity: 1;
+}
+
+.turbine-marker:hover .turbine-marker-label,
+.turbine-marker:focus-visible .turbine-marker-label,
+.turbine-marker[aria-pressed='true'] .turbine-marker-label {
+  translate: 0 var(--label-shift, 13px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .turbine-marker .wind-turbine-rotor,
+  .turbine-badge-pulse,
+  .turbine-badge-blink {
+    animation: none;
+  }
+}
+
+/* El detalle va siempre sobre los marcadores: estos se apilan por severidad (z-index hasta 1000, ver
+   lib/markerLayout), y el popup de MapLibre trae solo z-index 3. */
+.maplibregl-popup.turbine-map-popup {
+  z-index: 2000;
+}
+
+/* Tema del popup de MapLibre con los tokens del Design System (el popup por defecto es blanco). */
+.turbine-map-popup .maplibregl-popup-content {
+  background: hsl(var(--surface-panel));
+  color: hsl(var(--ink));
+  border: 1px solid hsl(var(--line-medium));
+  border-radius: var(--radius);
+  padding: 14px 16px 14px;
+  box-shadow: 0 8px 24px hsl(var(--surface-base) / 0.6);
+}
+
+.turbine-map-popup .maplibregl-popup-close-button {
+  color: hsl(var(--ink-muted));
+  font-size: 20px;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: var(--radius);
+}
+
+.turbine-map-popup .maplibregl-popup-close-button:hover {
+  background: hsl(var(--surface-card));
+  color: hsl(var(--ink));
+}
+
+.turbine-map-popup .maplibregl-popup-close-button:focus-visible {
+  outline: 2px solid hsl(var(--brand));
+}
+
+.turbine-map-popup.maplibregl-popup-anchor-bottom .maplibregl-popup-tip,
+.turbine-map-popup.maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip,
+.turbine-map-popup.maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip {
+  border-top-color: hsl(var(--line-medium));
+}
+
+.turbine-map-popup.maplibregl-popup-anchor-top .maplibregl-popup-tip,
+.turbine-map-popup.maplibregl-popup-anchor-top-left .maplibregl-popup-tip,
+.turbine-map-popup.maplibregl-popup-anchor-top-right .maplibregl-popup-tip {
+  border-bottom-color: hsl(var(--line-medium));
+}
+
+.turbine-map-popup.maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  border-right-color: hsl(var(--line-medium));
+}
+
+.turbine-map-popup.maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  border-left-color: hsl(var(--line-medium));
+}
