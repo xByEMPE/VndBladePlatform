@@ -215,7 +215,7 @@ export default function ReportEditorPage() {
 
   const handleDelete = async (id) => {
     if (!id) return;
-    if (!confirm(t("reportEditor.confirmDelete"))) return;
+    if (!window.confirm(t("reportEditor.confirmDelete"))) return;
 
     setDeleting(true);
     setStatusMsg(t("reportEditor.deleting"));

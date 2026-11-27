@@ -10,7 +10,7 @@
     "serve": "node serve-spa.js",
     "dev:spa": "vite --host 0.0.0.0",
     "test:spa": "node test-spa.js",
-    "lint": "eslint --ext .js,.jsx src/components/ui src/components/layout src/components/dashboard src/components/reportViewer src/components/Header.jsx src/components/projects/formKit.jsx src/pages/DashboardPage.jsx src/pages/ReportsPortalPage.jsx src/pages/GeneralProgressPage.jsx src/pages/ProjectsPage.jsx src/pages/DataCapturePage.jsx src/pages/WtgGeneratorPage.jsx src/pages/AdminPage.jsx src/pages/admin-page.test.jsx src/components/auth src/pages/LoginPage.jsx src/pages/InvitePage.jsx src/pages/PasswordResetPage.jsx src/pages/auth-pages.test.jsx src/pages/ImageViewerPage.jsx src/pages/imageViewer/components src/pages/imageViewer/image-viewer.test.jsx src/components/EditableImageViewer.jsx src/pages/damage-editor.test.jsx src/components/damageEditor src/components/wtgm src/components/DeleteProjectDialog.jsx src/pages/wtg-generator.test.jsx src/components/delete-dialog.test.jsx src/pages/reportViewer/components src/pages/damageEditor/components/EditorHeader.jsx src/pages/reportViewer/report-viewer.test.jsx src/lib/status.js src/lib/gauge.js src/lib/roleLabel.js src/lib/classes.js src/lib/projectStatus.js src/test",
+    "lint": "eslint --ext .js,.jsx src",
     "test": "vitest"
   },
   "dependencies": {

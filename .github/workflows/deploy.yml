@@ -46,6 +46,21 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+      - name: Verify required secrets
+        # Sin estos valores el build no falla (supabase.js usa un respaldo) pero el login queda roto.
+        run: |
+          missing=0
+          for name in VITE_SUPABASE_URL VITE_SUPABASE_ANON_KEY FTP_HOST FTP_USER FTP_PASSWORD FTP_DIR; do
+            if [ -z "${!name}" ]; then echo "::error::Falta el secret $name"; missing=1; fi
+          done
+          exit $missing
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_DIR: ${{ secrets.FTP_DIR }}
       - run: npm ci
       - name: Build
         run: npm run build
