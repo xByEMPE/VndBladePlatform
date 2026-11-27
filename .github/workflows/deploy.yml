@@ -70,7 +70,7 @@ jobs:
           VITE_HF_API_URL: ${{ secrets.VITE_HF_API_URL }}
           VITE_IMAGES_PRIVATE: ${{ secrets.VITE_IMAGES_PRIVATE }}
       - name: Upload dist/ to public_html
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USER }}
