@@ -19,7 +19,7 @@ torchvision
 # Backend & Networking
 supabase
 requests==2.31.0
-urllib3==2.1.0
+urllib3==2.8.0
 
 # Build Tools (for creating executables)
 pyinstaller==6.3.0
