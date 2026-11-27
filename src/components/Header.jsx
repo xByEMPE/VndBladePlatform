@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { LogOut } from 'lucide-react';
+import { LogOut, Menu } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher';
 import UserProfile from '@/components/layout/UserProfile';
 import { getCurrentUserRole } from '@/utils/userManagement';
 import { getRoleLabel } from '@/lib/roleLabel';
 import { ALERT_DESTRUCTIVE } from '@/lib/classes';
+import { cn } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,7 +21,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
-const Header = ({ user, onLogout }) => {
+const Header = ({ user, onLogout, showMenuToggle = false, menuCollapsed = false, onToggleMenu }) => {
     const navigate = useNavigate();
     const { t } = useTranslation('common');
     const [showLogoutDialog, setShowLogoutDialog] = useState(false);
@@ -61,12 +62,30 @@ const Header = ({ user, onLogout }) => {
                 className="sticky top-0 z-40 border-b border-line-subtle bg-surface-panel"
             >
                 <div className="w-full flex items-center justify-between h-16 pl-4 sm:pl-6 lg:pl-8 pr-2 sm:pr-3">
+                    <div className="flex items-center gap-4">
+                    {showMenuToggle && (
+                        <button
+                            type="button"
+                            onClick={onToggleMenu}
+                            aria-expanded={!menuCollapsed}
+                            aria-label={menuCollapsed ? 'Abrir menú' : 'Cerrar menú'}
+                            title={menuCollapsed ? 'Abrir menú' : 'Cerrar menú'}
+                            className={cn(
+                                'inline-flex h-9 shrink-0 cursor-pointer items-center gap-2 rounded-lg border border-line-subtle bg-surface-card/50 px-3 py-2 text-ink transition-all duration-150',
+                                'hover:border-info/30 hover:bg-info/15 hover:text-info',
+                            )}
+                        >
+                            <Menu size={18} strokeWidth={2} aria-hidden="true" />
+                            <span className="text-xs font-semibold uppercase tracking-wide">Menú</span>
+                        </button>
+                    )}
                     <div 
                         className="flex items-center gap-3 cursor-pointer"
                         onClick={() => navigate('/')}
                     >
                         <img src="/icons/ia.png" alt="VINDGROUP Icon" className="w-16 h-16"/>
                         <span className="text-2xl font-bold text-white hidden sm:block">VINDGROUP</span>
+                    </div>
                     </div>
 
                     <div className="flex items-center gap-3 sm:gap-4">

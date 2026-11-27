@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 
 const LanguageSwitcher = ({ compact = false }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
   const buttonRef = useRef(null);
   const { currentLanguage, changeLanguage, languages } = useLanguage();
 
@@ -18,8 +18,9 @@ const LanguageSwitcher = ({ compact = false }) => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       setDropdownPosition({
-        top: rect.bottom + 8, // 8px gap
-        right: window.innerWidth - rect.right,
+        top: rect.bottom + 4, // separación mínima bajo el botón
+        left: rect.left,
+        width: rect.width, // mismo ancho que el selector
       });
     }
   }, [isOpen]);
@@ -41,9 +42,10 @@ const LanguageSwitcher = ({ compact = false }) => {
             transition={{ duration: 0.15 }}
             style={{
               top: `${dropdownPosition.top}px`,
-              right: `${dropdownPosition.right}px`,
+              left: `${dropdownPosition.left}px`,
+              width: `${dropdownPosition.width}px`,
             }}
-            className="fixed py-2 w-48 bg-slate-800/95 backdrop-blur-lg border border-slate-700/50 rounded-lg shadow-lg z-[99999]"
+            className="fixed py-1 bg-slate-800/95 backdrop-blur-lg border border-slate-700/50 rounded-md shadow-lg z-[99999]"
           >
             {languages.map((language) => (
               <button
@@ -52,13 +54,13 @@ const LanguageSwitcher = ({ compact = false }) => {
                   changeLanguage(language.code);
                   setIsOpen(false);
                 }}
-                className={`w-full px-4 py-2 text-left hover:bg-slate-700/50 transition-colors flex items-center gap-3 ${
+                className={`w-full px-2.5 py-1.5 text-left text-xs hover:bg-slate-700/50 transition-colors flex items-center gap-2 ${
                   currentLanguage === language.code
                     ? 'bg-yellow-500/10 text-yellow-400 border-l-2 border-yellow-500'
                     : 'text-gray-300'
                 }`}
               >
-                <span className="text-lg">{language.flag}</span>
+                <span className="text-sm">{language.flag}</span>
                 <span className="font-medium">{language.name}</span>
                 {currentLanguage === language.code && (
                   <div className="ml-auto w-2 h-2 bg-yellow-500 rounded-full"></div>

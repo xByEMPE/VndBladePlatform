@@ -60,8 +60,43 @@ EXIF/
 *.7z
 *.tar.gz
 
-# Config personal de Claude Code
+# Entorno: explícito, incluidos nombres con espacio y copias
+.env copy*
+.env.copy*
+.env.*.local
+!.env.example
+
+# Config local de Claude Code (permisos personales; *.local no lo cubre)
 .claude/settings.local.json
 
 # Pipeline de IA (fuera del repositorio)
 ai_pipeline/
+
+# Notas e informes internos (no van al repositorio)
+REPORTE_DEPURACION.md
+REPORTE_MAPA_INTERACTIVO.md
+context.md
+contextwtgm.md
+opencode.json
+
+# Cachés y artefactos
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+.cache/
+coverage/
+.vercel/
+supabase/.temp/
+*.tsbuildinfo
+
+# Temporales y logs
+*.tmp
+*.bak
+*.swp
+tmp/
+logs/
+
+# Sistema operativo
+Desktop.ini
+ehthumbs.db
+$RECYCLE.BIN/
