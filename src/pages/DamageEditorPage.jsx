@@ -37,7 +37,6 @@ import { SectionTiles, DetectionList, PanelTitle, ToolBtn, ToolGroup, ToolSlider
 import { SEV, sevNumber, OVERLINE, FOCUS } from "@/components/reportViewer/viewerKit";
 
 import { DAMAGE_TYPES, getLocalizedDamageString } from "./shared/damage";
-export { DAMAGE_TRANSLATIONS_EN, getLocalizedDamageString } from "./shared/damage";
 import {
   normSev,
   getDamageBbox,
@@ -62,6 +61,8 @@ import { BladeViewerPanel } from "./damageEditor/components/BladeViewerPanel";
 import { SectionsPanel } from "./damageEditor/components/SectionsPanel";
 import { DamageInfoPanel } from "./damageEditor/components/DamageInfoPanel";
 import { DetectionsPanel } from "./damageEditor/components/DetectionsPanel";
+
+export { DAMAGE_TRANSLATIONS_EN, getLocalizedDamageString } from "./shared/damage";
 
 const SECTION_ORDER = ["TE", "PS", "LE", "SS"];
 

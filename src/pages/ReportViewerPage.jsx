@@ -116,7 +116,6 @@ import {
   getDamageExtraData,
 } from "./shared/damage";
 import { getThumbnailUrl, loadImageElement, addBboxToImage, cropImageFromBbox } from "./shared/image";
-export { DAMAGE_TRANSLATIONS_EN, getLocalizedDamageString } from "./shared/damage";
 import { drawBladeSvgWithDot } from "./reportViewer/pdf/bladeSvg";
 import { createReportPdf } from "./reportViewer/pdf/createReportPdf";
 import { useReportData } from "./reportViewer/hooks/useReportData";
@@ -139,6 +138,8 @@ import { renderBoundingBox } from "./reportViewer/utils/renderBoundingBox";
 import { getBladeDisplayName, getSuggestedAction } from "./reportViewer/utils/labels";
 import { bladeSections, EMPTY_IMAGES, bladeTabs } from "./reportViewer/utils/constants";
 import { getImageFullUrl, getImageThumbUrl } from "./reportViewer/utils/urls";
+
+export { DAMAGE_TRANSLATIONS_EN, getLocalizedDamageString } from "./shared/damage";
 
 // === UTILIDADES DE NAVEGACIÓN V2 ===
 const getImageNavigationData = async (captureId) => {

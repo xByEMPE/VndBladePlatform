@@ -1,0 +1,3 @@
+# Falso positivo: README de b115d35 mostraba solo la cabecera JWT estándar ("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."),
+# sin payload ni firma. Reemplazado por placeholder en commits posteriores.
+b115d358fd56a60349618f0a8da5a4197a3ae180:README.md:generic-api-key:1394

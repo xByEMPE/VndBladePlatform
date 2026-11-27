@@ -9,8 +9,12 @@ vi.mock('maplibre-gl', () => ({ setWorkerUrl: h.setWorkerUrl, Map: class FakeMap
 vi.mock('maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url', () => ({ default: '/assets/maplibre-gl-worker-abc123.js' }));
 
 describe('lib/maplibre', () => {
-  it('registra la URL del worker empaquetado por Vite al importarse', () => {
-    expect(workerUrl).toBe('/assets/maplibre-gl-worker-abc123.js');
+  it('registra la URL del worker empaquetado por Vite al importarse', async () => {
+    // Vitest 5 limpia los mocks entre tests: se reimporta el módulo para observar la llamada del import.
+    vi.resetModules();
+    h.setWorkerUrl.mockClear();
+    const reimported = await import('./maplibre');
+    expect(reimported.workerUrl).toBe('/assets/maplibre-gl-worker-abc123.js');
     expect(h.setWorkerUrl).toHaveBeenCalledTimes(1);
     expect(h.setWorkerUrl).toHaveBeenCalledWith('/assets/maplibre-gl-worker-abc123.js');
   });
