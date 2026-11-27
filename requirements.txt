@@ -5,7 +5,7 @@
 
 # Core Computer Vision & Image Processing
 opencv-python==4.8.1.78
-opencv-contrib-python==4.8.1.78
+opencv-contrib-python==5.1.0.95
 Pillow==10.3.0
 scikit-image==0.22.0
 
