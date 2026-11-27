@@ -4,6 +4,11 @@
  */
 
 /** Anillo de foco estándar (teclado). */
+/** Botón que se ilumina con borde claro y resplandor al abrirse o con el mouse encima (usuario y menú del header). */
+export const GLOW_BUTTON_BASE = 'border-line-subtle transition-[border-color,box-shadow] duration-200';
+export const GLOW_BUTTON_ACTIVE = 'border-info/50 shadow-[0_0_6px_hsl(var(--info)/0.12)]';
+export const GLOW_BUTTON_HOVER = 'hover:border-info/50 hover:shadow-[0_0_6px_hsl(var(--info)/0.12)]';
+
 export const FOCUS_RING =
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-background';
 

@@ -23,6 +23,10 @@ import AdminPage from '@/pages/AdminPage';
 import ProfilePage from '@/pages/ProfilePage';
 import AuditLogsPage from '@/pages/AuditLogsPage';
 import WtgGeneratorPage from '@/pages/WtgGeneratorPage';
+import ProjectProgressPage from '@/pages/operations/ProjectProgressPage';
+import AdminRegistryPage from '@/pages/admin/AdminRegistryPage';
+import AppShell from '@/components/layout/AppShell';
+
 import Header from '@/components/Header';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
@@ -31,6 +35,7 @@ const App = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState(null);
+  const [menuCollapsed, setMenuCollapsed] = useState(false);
   const knownUserIdRef = useRef(null);
   const roleRef = useRef(null);
   roleRef.current = role;
@@ -156,6 +161,8 @@ const App = () => {
   }
 
   const showHeader = isAuthenticated && location.pathname !== '/login' && location.pathname !== '/invite';
+  // Menú lateral en todas las páginas autenticadas (no en login, invitación ni recuperación de contraseña).
+  const showShell = showHeader && location.pathname !== '/password-reset';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black text-white">
@@ -166,8 +173,17 @@ const App = () => {
         <meta property="og:description" content={t('app.portalDescription')} />
       </Helmet>
 
-      {showHeader && <Header user={user} onLogout={handleLogout} />}
+      {showHeader && (
+        <Header
+          user={user}
+          onLogout={handleLogout}
+          showMenuToggle={showShell}
+          menuCollapsed={menuCollapsed}
+          onToggleMenu={() => setMenuCollapsed((v) => !v)}
+        />
+      )}
       <main>
+        <AppShell enabled={showShell} collapsed={menuCollapsed}>
         <Routes>
           {/* Rutas públicas */}
           <Route path="/invite" element={<InvitePage />} />
@@ -188,13 +204,29 @@ const App = () => {
           />
 
           {/* Rutas operativas */}
-          <Route 
-            path="/" 
+          <Route
+            path="/"
             element={isAuthenticated ? (
               <RoleGuard role={role}>
                 <DashboardPage role={role} />
               </RoleGuard>
-            ) : <Navigate to="/login" />} 
+            ) : <Navigate to="/login" />}
+          />
+          <Route
+            path="/avances"
+            element={isAuthenticated ? (
+              <RoleGuard role={role}>
+                <ProjectProgressPage />
+              </RoleGuard>
+            ) : <Navigate to="/login" />}
+          />
+          <Route
+            path="/centro-admin/:registryId"
+            element={isAuthenticated ? (
+              <RoleGuard role={role}>
+                <AdminRegistryPage />
+              </RoleGuard>
+            ) : <Navigate to="/login" />}
           />
           <Route 
             path="/projects" 
@@ -295,6 +327,7 @@ const App = () => {
           {/* Ruta por defecto */}
           <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} />} />
         </Routes>
+        </AppShell>
       </main>
       <Toaster />
     </div>

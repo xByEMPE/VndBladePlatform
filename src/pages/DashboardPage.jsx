@@ -1,37 +1,44 @@
 import { tx } from "@/i18n/tx";
 import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import { MotionConfig } from "framer-motion";
-import {
-  FolderKanban,
-  BarChart3,
-  Wind,
-  Shield,
-  Sliders,
-  BookOpen,
-  Activity,
-  AlertTriangle,
-  CheckCircle2,
-  Clock
-} from "lucide-react";
+import { Activity } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useRolePermissions } from "@/hooks/useRolePermissions";
 import { fetchFilteredProjects } from "@/utils/projectFiltering";
-import { toPercent, percentOf, formatPercent } from "@/lib/gauge";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import PageHeader from "@/components/layout/PageHeader";
 import BentoCard from "@/components/ui/BentoCard";
-import KpiGrid from "@/components/ui/KpiGrid";
-import KpiMetric from "@/components/ui/KpiMetric";
-import Overline from "@/components/ui/Overline";
-import ProgressBar from "@/components/ui/ProgressBar";
 import Reveal from "@/components/ui/Reveal";
-import ModuleLink from "@/components/dashboard/ModuleLink";
-import RecentActivityCard from "@/components/dashboard/RecentActivityCard";
-import YearFilter from "@/components/dashboard/YearFilter";
+import ActiveProjectsMap from "@/components/dashboard/ActiveProjectsMap";
+import { parseCoordinates } from "@/lib/coordinates";
+import ProjectSummaryPanel from "@/components/dashboard/ProjectSummaryPanel";
+
+/**
+ * Posición de cada proyecto: centro (promedio) de las coordenadas válidas de sus turbinas.
+ * Los proyectos sin ninguna coordenada quedan con `position: null` (no se dibujan).
+ */
+const buildProjectPositions = (projects, turbines) => {
+  const byProject = new Map();
+  turbines.forEach(t => {
+    const pos = parseCoordinates(t.coordinates);
+    if (!pos) return;
+    const list = byProject.get(t.project_id) || [];
+    list.push(pos);
+    byProject.set(t.project_id, list);
+  });
+  return projects.map(p => {
+    const pts = byProject.get(p.id) || [];
+    const position = pts.length
+      ? {
+          lat: pts.reduce((s, q) => s + q.lat, 0) / pts.length,
+          lon: pts.reduce((s, q) => s + q.lon, 0) / pts.length,
+        }
+      : null;
+    return { id: p.id, name: p.name, statusLabel: tx(p.status || 'Planeación'), position };
+  });
+};
 
 const DashboardPage = ({ role: propRole }) => {
-  const navigate = useNavigate();
   const { role: hookRole, isAdmin } = useRolePermissions();
 
   const effectiveRole = propRole || hookRole;
@@ -39,7 +46,7 @@ const DashboardPage = ({ role: propRole }) => {
 
   const [loading, setLoading] = useState(true);
   const [allProjects, setAllProjects] = useState([]);
-  const [recentProjects, setRecentProjects] = useState([]);
+  const [mapItems, setMapItems] = useState([]);
 
   // Filtro de años
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
@@ -72,11 +79,17 @@ const DashboardPage = ({ role: propRole }) => {
             setSelectedYear(sortedYears[0]);
           }
 
-          setRecentProjects(
-            [...filteredProjects]
-              .sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at))
-              .slice(0, 4)
-          );
+          // Mapa: cada proyecto activo se ubica en el centro de sus turbinas con coordenadas válidas.
+          const active = filteredProjects.filter(p => p.status !== 'Completado' && p.status !== 'Cancelado');
+          let turbines = [];
+          if (active.length > 0) {
+            const { data } = await supabase
+              .from("turbines")
+              .select("project_id, coordinates")
+              .in("project_id", active.map(p => p.id));
+            turbines = data || [];
+          }
+          setMapItems(buildProjectPositions(active, turbines));
         }
       } catch (error) {
         console.error("Dashboard init error:", error);
@@ -124,10 +137,6 @@ const DashboardPage = ({ role: propRole }) => {
   }
 
   const { projectStats, turbineStats } = dashboardData;
-  const pendingTurbines = Math.max(0, turbineStats.total - turbineStats.completed - turbineStats.inProgress);
-  const pctInspected = percentOf(turbineStats.completed, turbineStats.total);
-  const pctInProgress = percentOf(turbineStats.inProgress, turbineStats.total);
-  const pctPending = percentOf(pendingTurbines, turbineStats.total);
 
   return (
     <MotionConfig reducedMotion="user">
@@ -142,7 +151,7 @@ const DashboardPage = ({ role: propRole }) => {
                 className="border-b-0 pb-0"
                 icon={<Activity size={24} />}
                 overline={tx("Gestión de activos eólicos")}
-                title={isUserAdmin ? tx("Centro de Operaciones") : tx("Panel de Cliente")}
+                title={isUserAdmin ? tx("Panel principal") : tx("Panel de Cliente")}
                 description={isUserAdmin
                   ? tx("Monitorea el progreso de las inspecciones, gestiona equipos y visualiza reportes globales.")
                   : tx("Monitorea el progreso en tiempo real y descarga los reportes de inspección de tus activos.")}
@@ -150,142 +159,19 @@ const DashboardPage = ({ role: propRole }) => {
             </BentoCard>
           </Reveal>
 
-          {/* Indicadores clave */}
-          <Reveal delay={0.05}>
-            <BentoCard as="section" flat aria-labelledby="kpi-title">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line-subtle px-5 py-3">
-                <Overline as="h2" id="kpi-title" className="flex items-center gap-2 text-ink">
-                  <FolderKanban size={14} className="text-info" aria-hidden="true" />
-                  {isUserAdmin ? tx("Resumen de proyectos") : tx("Mis proyectos")}
-                </Overline>
-                <YearFilter
-                  value={selectedYear}
-                  onChange={setSelectedYear}
-                  years={availableYears}
-                  label={tx("Filtrar por año")}
-                  allLabel={tx("Histórico (Todos)")}
-                />
-              </div>
+          {/* Resumen de proyectos (Panel principal) */}
+          <ProjectSummaryPanel
+            isUserAdmin={isUserAdmin}
+            selectedYear={selectedYear}
+            onYearChange={setSelectedYear}
+            availableYears={availableYears}
+            projectStats={projectStats}
+            turbineStats={turbineStats}
+          />
 
-              <KpiGrid>
-                <KpiMetric
-                  className="col-span-2 p-5 lg:col-span-1"
-                  label={tx("Proyectos")}
-                  value={projectStats.total}
-                  caption={
-                    <>
-                      <span className="font-semibold text-info">{projectStats.active}</span> {tx("activos")} ·{" "}
-                      <span className="font-semibold text-status-done">{projectStats.completed}</span> {tx("concluidos")}
-                    </>
-                  }
-                >
-                  <ProgressBar
-                    status="done"
-                    value={toPercent(projectStats.completed, projectStats.total)}
-                    label={tx("Proyectos concluidos")}
-                  />
-                </KpiMetric>
-
-                <KpiMetric
-                  className="p-5"
-                  label={tx("Total turbinas")}
-                  value={turbineStats.total}
-                  caption={tx("Asignadas en {{year}}", { year: selectedYear })}
-                  icon={<Wind size={18} />}
-                >
-                  <ProgressBar status="pending" value={turbineStats.total > 0 ? 100 : 0} label={tx("Total turbinas")} />
-                </KpiMetric>
-                <KpiMetric
-                  className="p-5"
-                  label={tx("Inspeccionadas")}
-                  value={turbineStats.completed}
-                  caption={tx("Reportes listos")}
-                  trailing={formatPercent(pctInspected)}
-                  trailingClassName="text-status-done"
-                  icon={<CheckCircle2 size={18} />}
-                  iconClassName="text-status-done"
-                >
-                  <ProgressBar status="done" value={pctInspected} label={tx("Turbinas inspeccionadas")} />
-                </KpiMetric>
-                <KpiMetric
-                  className="p-5"
-                  label={tx("En progreso")}
-                  value={turbineStats.inProgress}
-                  caption={tx("Captura en campo")}
-                  trailing={formatPercent(pctInProgress)}
-                  trailingClassName="text-status-progress"
-                  icon={<Clock size={18} />}
-                  iconClassName="text-status-progress"
-                >
-                  <ProgressBar status="progress" value={pctInProgress} label={tx("Turbinas en progreso")} />
-                </KpiMetric>
-                <KpiMetric
-                  className="p-5"
-                  label={tx("Pendientes")}
-                  value={pendingTurbines}
-                  caption={tx("Sin iniciar")}
-                  trailing={formatPercent(pctPending)}
-                  trailingClassName="text-status-alert"
-                  icon={<AlertTriangle size={18} />}
-                  iconClassName="text-status-alert"
-                >
-                  <ProgressBar status="alert" value={pctPending} label={tx("Turbinas pendientes")} />
-                </KpiMetric>
-              </KpiGrid>
-            </BentoCard>
-          </Reveal>
-
-          {/* Módulos */}
-          <Reveal delay={0.1}>
-            <section aria-labelledby="modules-title">
-              <Overline as="h2" id="modules-title" className="mb-3 block">{tx("Módulos")}</Overline>
-              <div className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${isUserAdmin ? "lg:grid-cols-3 xl:grid-cols-5" : ""}`}>
-                <ModuleLink
-                  featured
-                  title={tx("Progreso General")}
-                  description={tx("Supervisa el avance por turbina, revisa estados y estatus operativos.")}
-                  icon={<BarChart3 size={20} />}
-                  onClick={() => navigate("/progress")}
-                />
-                <ModuleLink
-                  title={tx("Portal de Reportes")}
-                  description={tx("Accede a la descarga directa de reportes.")}
-                  icon={<BookOpen size={20} />}
-                  onClick={() => navigate("/reports-portal")}
-                />
-                {isUserAdmin && (
-                  <>
-                    <ModuleLink
-                      title={tx("Inspecciones de Palas")}
-                      description={tx("Crea nuevas campañas, asigna personal y configura parques.")}
-                      icon={<FolderKanban size={20} />}
-                      onClick={() => navigate("/projects")}
-                    />
-                    <ModuleLink
-                      title={tx("Inspecciones LPS")}
-                      description={tx("Crea nuevas campañas, asigna personal y configura parques.")}
-                      icon={<Shield size={20} />}
-                      onClick={() => navigate("/capture")}
-                    />
-                    <ModuleLink
-                      title={tx("Generador WTG")}
-                      description={tx("Calibra la geometría de la turbina con 2 fotos y genera el archivo .wtgm.")}
-                      icon={<Sliders size={20} />}
-                      onClick={() => navigate("/wtg-generator")}
-                    />
-                  </>
-                )}
-              </div>
-            </section>
-          </Reveal>
-
-          {/* Actividad reciente */}
+          {/* Mapa de parques eólicos activos */}
           <Reveal delay={0.15}>
-            <RecentActivityCard
-              projects={recentProjects}
-              onOpenProject={(project) => navigate("/progress", { state: { selectedProject: project } })}
-              onManageAll={isUserAdmin ? () => navigate("/projects") : undefined}
-            />
+            <ActiveProjectsMap items={mapItems} />
           </Reveal>
 
         </div>

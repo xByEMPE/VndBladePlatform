@@ -3,6 +3,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { User, Settings, FileCheck2, ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { GLOW_BUTTON_ACTIVE, GLOW_BUTTON_BASE, GLOW_BUTTON_HOVER } from '@/lib/classes';
 
 /**
  * Cápsula interactiva de perfil del navbar con menú desplegable:
@@ -58,7 +60,12 @@ const UserProfile = ({ email, role, isDev = false, canConfigure = false }) => {
         onClick={() => setIsOpen((prev) => !prev)}
         aria-expanded={isOpen}
         aria-haspopup="menu"
-        className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-line-subtle bg-surface-card px-3 py-1.5 transition-colors hover:border-line-medium"
+        className={cn(
+          'flex cursor-pointer items-center gap-2.5 rounded-lg border bg-surface-card px-3 py-1.5',
+          GLOW_BUTTON_BASE,
+          GLOW_BUTTON_HOVER,
+          isOpen && GLOW_BUTTON_ACTIVE,
+        )}
       >
         <span
           aria-hidden="true"

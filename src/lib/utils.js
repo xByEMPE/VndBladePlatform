@@ -19,6 +19,8 @@ const ADMIN_OPERATIONAL_ROUTES = [
   '/profile',
   '/projects',
   '/progress',
+  '/avances',
+  '/centro-admin',
   '/capture',
   '/reports-portal',
   '/report-viewer',
