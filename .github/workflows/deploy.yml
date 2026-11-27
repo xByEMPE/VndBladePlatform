@@ -1,7 +1,6 @@
 name: Deploy
 
-# Despliega a Vercel SOLO si la auditoría completa pasa. Vercel no despliega por su cuenta
-# (git.deploymentEnabled=false en vercel.json).
+# Despliega a Hostinger (public_html) por FTP SOLO si la auditoría completa pasa.
 on:
   push:
     branches: [main]
@@ -13,10 +12,6 @@ permissions:
 concurrency:
   group: deploy-production
   cancel-in-progress: false
-
-env:
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 jobs:
   audit:
@@ -40,7 +35,7 @@ jobs:
       - run: ./gitleaks detect --source . --redact --exit-code 1
 
   deploy:
-    name: deploy-production
+    name: deploy-hostinger
     needs: audit
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -52,6 +47,19 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - run: npx vercel@latest pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-      - run: npx vercel@latest build --prod --token=${{ secrets.VERCEL_TOKEN }}
-      - run: npx vercel@latest deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_HF_API_URL: ${{ secrets.VITE_HF_API_URL }}
+          VITE_IMAGES_PRIVATE: ${{ secrets.VITE_IMAGES_PRIVATE }}
+      - name: Upload dist/ to public_html
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          local-dir: ./dist/
+          server-dir: ${{ secrets.FTP_DIR }}
