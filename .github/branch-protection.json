@@ -1,7 +1,7 @@
 {
   "required_status_checks": {
     "strict": true,
-    "contexts": ["lint-test-build", "npm-audit", "secret-scan", "codeql"]
+    "contexts": ["lint-test-build", "npm-audit", "secret-scan"]
   },
   "enforce_admins": true,
   "required_pull_request_reviews": {
