@@ -1390,8 +1390,8 @@ Componente que muestra un selector de idioma en el header.
 
 ```bash
 # Supabase Configuration
-VITE_SUPABASE_URL=https://bsbrdjmrjlilzxuyduom.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+VITE_SUPABASE_URL=https://<project-ref>.supabase.co
+VITE_SUPABASE_ANON_KEY=<anon-key>
 
 # LibreTranslate (Space de Hugging Face)
 VITE_LIBRETRANSLATE_URL=https://TU-USUARIO-TU-SPACE.hf.space
